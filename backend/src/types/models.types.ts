@@ -23,8 +23,9 @@ export interface IFileBase{
     originalName: string;
     mimeType: string;
     size: number;
-    s3key: string;
+    s3Key: string;
     folderId: Types.ObjectId | null;
+    ownerId: Types.ObjectId;
     isPublic: boolean;
     shareToken?: string;
     shareExpiresAt?: Date;
@@ -36,7 +37,7 @@ export interface IFolderBase {
     name: string;
     path: string;
     parentId: Types.ObjectId | null;
-    ownerId: Types.ObjectId | null;
+    ownerId: Types.ObjectId;
     depth: number;
 }
 
