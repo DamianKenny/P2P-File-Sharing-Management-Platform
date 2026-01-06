@@ -27,8 +27,8 @@ export interface IFileBase{
     folderId: Types.ObjectId | null;
     ownerId: Types.ObjectId;
     isPublic: boolean;
-    shareToken?: string;
-    shareExpiresAt?: Date;
+    shareToken: string | null;
+    shareExpiresAt: Date | null;
     downloadCount: number;
 }
 
