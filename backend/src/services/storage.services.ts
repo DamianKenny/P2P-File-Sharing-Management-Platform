@@ -26,24 +26,27 @@ interface CompletedPart {
   PartNumber: number;
 }
 
+/**
+ * Storage Service
+ * Handles all S3/Supabase storage operations
+ */
 export class StorageService {
-    //initialize multi part upload
+  /**
+   * Initialize a multipart upload
+   * Returns presigned URLs for each part
+   */
   static async initializeMultipartUpload(
     userId: string,
     fileName: string,
     fileSize: number,
     mimeType: string
   ): Promise<InitUploadResult> {
-    // Generate unique S3 key
     const key = generateS3Key(userId, fileName);
-    
-    // Calculate optimal part size
     const { partSize, totalParts } = calculatePartSize(fileSize);
 
     logger.info(`Initializing multipart upload: ${key}, ${totalParts} parts`);
 
     try {
-      // Create multipart upload
       const createCommand = new CreateMultipartUploadCommand({
         Bucket: BUCKET_NAME,
         Key: key,
@@ -89,14 +92,42 @@ export class StorageService {
     }
   }
 
-  //complete multi port upload
+  /**
+   * Get presigned URL for a specific part (fallback)
+   */
+  static async getPartUploadUrl(
+    key: string,
+    uploadId: string,
+    partNumber: number
+  ): Promise<string> {
+    try {
+      const uploadPartCommand = new UploadPartCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+        UploadId: uploadId,
+        PartNumber: partNumber,
+      });
+
+      const presignedUrl = await getSignedUrl(s3Client, uploadPartCommand, {
+        expiresIn: 3600,
+      });
+
+      return presignedUrl;
+    } catch (error) {
+      logger.error('Failed to get part upload URL:', error);
+      throw ApiError.internal('Failed to get upload URL');
+    }
+  }
+
+  /**
+   * Complete a multipart upload
+   */
   static async completeMultipartUpload(
     key: string,
     uploadId: string,
     parts: CompletedPart[]
   ): Promise<void> {
     try {
-      // Sort parts by part number
       const sortedParts = parts.sort((a, b) => a.PartNumber - b.PartNumber);
 
       const completeCommand = new CompleteMultipartUploadCommand({
@@ -112,15 +143,14 @@ export class StorageService {
       logger.info(`Multipart upload completed: ${key}`);
     } catch (error) {
       logger.error('Failed to complete multipart upload:', error);
-      
-      // Try to abort the upload
       await this.abortMultipartUpload(key, uploadId).catch(() => {});
-      
       throw ApiError.internal('Failed to complete upload');
     }
   }
 
-  //abort multi part upload
+  /**
+   * Abort a multipart upload
+   */
   static async abortMultipartUpload(
     key: string,
     uploadId: string
@@ -139,7 +169,9 @@ export class StorageService {
     }
   }
 
-  //delete file
+  /**
+   * Delete a file from storage
+   */
   static async deleteFile(key: string): Promise<void> {
     try {
       const deleteCommand = new DeleteObjectCommand({
@@ -155,10 +187,12 @@ export class StorageService {
     }
   }
 
-  //get presigned url
+  /**
+   * Get a presigned URL for downloading a file
+   */
   static async getDownloadUrl(
     key: string,
-    expiresIn = 3600 // 1 hour default
+    expiresIn = 3600
   ): Promise<string> {
     try {
       const getCommand = new GetObjectCommand({
@@ -174,7 +208,9 @@ export class StorageService {
     }
   }
 
-  //check if file already exists in storage
+  /**
+   * Check if a file exists in storage
+   */
   static async fileExists(key: string): Promise<boolean> {
     try {
       const headCommand = new HeadObjectCommand({
@@ -189,7 +225,9 @@ export class StorageService {
     }
   }
 
-  //get file metadata from storage
+  /**
+   * Get file metadata from storage
+   */
   static async getFileMetadata(key: string): Promise<{
     size: number;
     contentType: string;

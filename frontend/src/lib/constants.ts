@@ -1,6 +1,8 @@
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'P2P File Platform';
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
 
+console.log('Constants loaded - API_URL:', API_URL);
+
 export const FILE_ICONS: Record<string, string> = {
     //Images
     'image/jpeg': '🖼️',

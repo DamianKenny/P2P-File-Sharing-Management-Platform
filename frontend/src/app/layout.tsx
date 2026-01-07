@@ -2,17 +2,12 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
-import { APP_NAME } from "@/lib/constants";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: {
-    default: APP_NAME,
-    template: `%s | ${APP_NAME}`,
-  },
-  description: "Secure peer-to-peer file sharing and management platform",
-  keywords: ["file sharing", "cloud storage", "file management", "p2p"],
+  title: "P2P File Platform",
+  description: "Secure file sharing platform",
 };
 
 export default function RootLayout({
@@ -31,22 +26,7 @@ export default function RootLayout({
             style: {
               background: "#fff",
               color: "#374151",
-              boxShadow:
-                "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
               borderRadius: "0.75rem",
-              padding: "0.75rem 1rem",
-            },
-            success: {
-              iconTheme: {
-                primary: "#10b981",
-                secondary: "#fff",
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: "#ef4444",
-                secondary: "#fff",
-              },
             },
           }}
         />

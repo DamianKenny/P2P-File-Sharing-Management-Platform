@@ -29,6 +29,13 @@ router.post(
 );
 
 /**
+ * @route   POST /api/v1/upload/sign-part
+ * @desc    Get presigned URL for a specific part (fallback)
+ * @access  Private
+ */
+router.post('/sign-part', UploadController.signPart);
+
+/**
  * @route   POST /api/v1/upload/complete
  * @desc    Complete multipart upload
  * @access  Private
@@ -44,9 +51,6 @@ router.post(
  * @desc    Abort multipart upload
  * @access  Private
  */
-router.post(
-  '/abort',
-  UploadController.abortUpload
-);
+router.post('/abort', UploadController.abortUpload);
 
 export default router;

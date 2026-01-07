@@ -2,10 +2,17 @@ import { Request, Response, NextFunction } from 'express';
 import { StorageService } from '../services/storage.services.js';
 import { FileService } from '../services/file.service.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
+import { ApiError } from '../utils/ApiError.js';
 
-//upload controller
+/**
+ * Upload Controller
+ * Handles file upload operations (presigned URLs, multipart upload)
+ */
 export class UploadController {
-  //POST upload/init
+  /**
+   * POST /upload/init
+   * Initialize a multipart upload and get presigned URLs
+   */
   static async initializeUpload(
     req: Request,
     res: Response,
@@ -30,7 +37,40 @@ export class UploadController {
     }
   }
 
-  //POST /upload/complete
+  /**
+   * POST /upload/sign-part
+   * Get presigned URL for a specific part (fallback if init URLs expire)
+   */
+  static async signPart(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { uploadId, key, partNumber } = req.body;
+
+      if (!uploadId || !key || !partNumber) {
+        throw ApiError.badRequest('uploadId, key, and partNumber are required');
+      }
+
+      const url = await StorageService.getPartUploadUrl(
+        key,
+        uploadId,
+        partNumber
+      );
+
+      res.json(
+        ApiResponse.success({ url }, 'Part URL generated').toJSON()
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /upload/complete
+   * Complete a multipart upload and save file metadata
+   */
   static async completeUpload(
     req: Request,
     res: Response,
@@ -62,7 +102,10 @@ export class UploadController {
     }
   }
 
-  // POST /upload/abort
+  /**
+   * POST /upload/abort
+   * Abort a multipart upload
+   */
   static async abortUpload(
     req: Request,
     res: Response,

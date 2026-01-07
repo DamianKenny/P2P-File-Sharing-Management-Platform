@@ -1,6 +1,9 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { API_URL, STORAGE_KEYS} from './constants';
 
+// Debug log
+console.log('API URL:', API_URL);
+
 //create axios instance with default config
 const api: AxiosInstance = axios.create({
     baseURL: API_URL,
